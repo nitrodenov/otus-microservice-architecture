@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otus1-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: otus1
+  template:
+    metadata:
+      labels:
+        app: otus1
+    spec:
+      containers:
+        - name: otus1
+          image: nitrodenov/otus:v1
+          ports:
+            - name: container-port
+              containerPort: 8000

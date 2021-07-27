@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: otus1-service
+spec:
+  selector:
+    app: otus1
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: container-port
+  type: NodePort
