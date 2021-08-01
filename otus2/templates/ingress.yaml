@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ include "otus2.fullname" . }}-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: arch.homework
+      http:
+        paths:
+          - path: /user
+            backend:
+              serviceName: {{ include "otus2.fullname" . }}-service
+              servicePort: 9000
+          - path: /user($|/)(.*)
+            backend:
+              serviceName: {{ include "otus2.fullname" . }}-service
+              servicePort: 9000

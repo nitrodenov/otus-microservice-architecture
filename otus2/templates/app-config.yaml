@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otus2-config
+data:
+  DATABASE_NAME: user
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: otus2-secret
+type: Opaque
+data:
+  DATABASE_URI: {{ printf "postgresql://%s:%s@%s:%s/%s?sslmode=disable" .Values.externalPostgresql.postgresqlUsername .Values.externalPostgresql.postgresqlPassword .Values.externalPostgresql.postgresqlHost .Values.externalPostgresql.postgresqlPort .Values.externalPostgresql.postgresqlDatabase  | b64enc | quote }}
