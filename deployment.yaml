@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otus3-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: otus3
+  template:
+    metadata:
+      labels:
+        app: otus3
+    spec:
+      containers:
+        - name: otus3
+          image: nitrodenov/otus:v3
+          env:
+            - name: DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: otus3-secret
+                  key: DATABASE_URI
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: otus3-config
+                  key: DATABASE_NAME
+          ports:
+            - name: container-port
+              containerPort: 8000
