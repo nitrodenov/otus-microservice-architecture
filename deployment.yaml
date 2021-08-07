@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: otus3
-          image: nitrodenov/otus:v3
+          image: nitrodenov/otus:v3.4
           env:
             - name: DATABASE_URI
               valueFrom:

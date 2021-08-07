@@ -17,3 +17,7 @@ spec:
             backend:
               serviceName: otus3-service
               servicePort: 9000
+          - path: /metrics
+            backend:
+              serviceName: otus3-service
+              servicePort: 9000

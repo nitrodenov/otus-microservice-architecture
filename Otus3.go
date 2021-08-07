@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
@@ -28,19 +29,29 @@ type Error struct {
 }
 
 func main() {
+	initMetrics()
 	r := mux.NewRouter()
 	r.HandleFunc("/user", addUser).Methods("POST")
 	r.HandleFunc("/user/{id}", getUser).Methods("GET")
 	r.HandleFunc("/user/{id}", updateUser).Methods("PUT")
 	r.HandleFunc("/user/{id}", deleteUser).Methods("DELETE")
+	r.PathPrefix("/metrics").Handler(promhttp.Handler())
 	http.Handle("/", r)
-	http.Handle("/metrics", promhttp.Handler())
 
 	fmt.Println("Start listening on 8000")
 	http.ListenAndServe(":8000", nil)
 }
 
+func initMetrics() {
+	prometheus.MustRegister(RequestCountAdd)
+	prometheus.MustRegister(RequestCountGet)
+	prometheus.MustRegister(RequestCountPut)
+	prometheus.MustRegister(RequestCountDelete)
+}
+
 func addUser(writer http.ResponseWriter, request *http.Request) {
+	defer RequestCountAdd.Inc()
+
 	writer.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "POST")
@@ -65,6 +76,8 @@ func addUser(writer http.ResponseWriter, request *http.Request) {
 }
 
 func getUser(writer http.ResponseWriter, request *http.Request) {
+	defer RequestCountGet.Inc()
+
 	writer.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -95,6 +108,8 @@ func getUser(writer http.ResponseWriter, request *http.Request) {
 }
 
 func updateUser(writer http.ResponseWriter, request *http.Request) {
+	defer RequestCountPut.Inc()
+
 	writer.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "PUT")
@@ -130,6 +145,8 @@ func updateUser(writer http.ResponseWriter, request *http.Request) {
 }
 
 func deleteUser(writer http.ResponseWriter, request *http.Request) {
+	defer RequestCountDelete.Inc()
+
 	writer.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "DELETE")

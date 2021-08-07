@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: otus3
+  labels:
+    app: otus3
+spec:
+  selector:
+    matchLabels:
+      app: otus3
+  endpoints:
+    - port: web
+      interval: 15s
+      path: /metrics

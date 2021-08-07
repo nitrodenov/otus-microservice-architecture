@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "otus3.fullname" . }}
+  labels:
+    {{- include "otus3.labels" . | nindent 4 }}
+spec:
+  jobLabel: {{ include "otus3.fullname" . }}
+  namespaceSelector:
+    matchNames:
+      - "{{ $.Release.Namespace }}"
+  selector:
+    matchLabels:
+      {{- include "otus3.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - interval: 15s
+      port: web
+      path: /metrics
