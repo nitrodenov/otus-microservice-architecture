@@ -1,3 +1,4 @@
+{{- if .Values.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -17,3 +18,8 @@ spec:
             backend:
               serviceName: {{ include "otus3.fullname" . }}-service
               servicePort: 9000
+          - path: /metrics
+            backend:
+              serviceName: {{ include "otus3.fullname" . }}-service
+              servicePort: 9000
+{{- end }}

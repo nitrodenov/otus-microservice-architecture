@@ -1,6 +1,6 @@
 replicaCount: 2
 
-image: nitrodenov/otus:v3.4
+image: nitrodenov/otus:v3.11
 
 deployment:
   app: otus3
@@ -12,9 +12,12 @@ service:
   app: otus3
   targetPort: container-port
 
-metrics:
-  serviceMonitor:
-    enabled: true
+ingress:
+  enabled: true
+
+serviceMonitor:
+  enabled: true
+  app: otus3
 
 externalPostgresql:
   postgresqlUsername: user

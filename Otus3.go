@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 type User struct {
@@ -47,10 +48,20 @@ func initMetrics() {
 	prometheus.MustRegister(RequestCountGet)
 	prometheus.MustRegister(RequestCountPut)
 	prometheus.MustRegister(RequestCountDelete)
+
+	prometheus.MustRegister(ErrorAdd)
+	prometheus.MustRegister(ErrorGet)
+	prometheus.MustRegister(ErrorPut)
+	prometheus.MustRegister(ErrorDelete)
+
+	prometheus.MustRegister(LatencyAdd)
+	prometheus.MustRegister(LatencyGet)
+	prometheus.MustRegister(LatencyPut)
+	prometheus.MustRegister(LatencyDelete)
 }
 
 func addUser(writer http.ResponseWriter, request *http.Request) {
-	defer RequestCountAdd.Inc()
+	requestStart := time.Now()
 
 	writer.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -67,16 +78,22 @@ func addUser(writer http.ResponseWriter, request *http.Request) {
 			message: "Unable to decode the request body. ",
 		}
 		json.NewEncoder(writer).Encode(error)
+		ErrorAdd.Inc()
 		return
 	}
 
 	_ = insertUser(user)
 
 	writer.WriteHeader(200)
+
+	RequestCountAdd.Inc()
+	requestTime := time.Since(requestStart).Seconds()
+	log.Printf("requestTime %s", requestTime)
+	LatencyAdd.Observe(requestTime)
 }
 
 func getUser(writer http.ResponseWriter, request *http.Request) {
-	defer RequestCountGet.Inc()
+	requestStart := time.Now()
 
 	writer.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -89,6 +106,7 @@ func getUser(writer http.ResponseWriter, request *http.Request) {
 			message: "Unable to convert the string into int.",
 		}
 		json.NewEncoder(writer).Encode(error)
+		ErrorGet.Inc()
 		return
 	}
 
@@ -100,15 +118,21 @@ func getUser(writer http.ResponseWriter, request *http.Request) {
 			message: "Unable to get user.",
 		}
 		json.NewEncoder(writer).Encode(error)
+		ErrorGet.Inc()
 		return
 	}
 
 	writer.WriteHeader(200)
 	json.NewEncoder(writer).Encode(user)
+
+	RequestCountGet.Inc()
+	requestTime := time.Since(requestStart).Seconds()
+	log.Printf("requestTime %s", requestTime)
+	LatencyGet.Observe(requestTime)
 }
 
 func updateUser(writer http.ResponseWriter, request *http.Request) {
-	defer RequestCountPut.Inc()
+	requestStart := time.Now()
 
 	writer.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -123,6 +147,7 @@ func updateUser(writer http.ResponseWriter, request *http.Request) {
 			message: "Unable to convert the string into int.",
 		}
 		json.NewEncoder(writer).Encode(error)
+		ErrorPut.Inc()
 		return
 	}
 
@@ -136,16 +161,22 @@ func updateUser(writer http.ResponseWriter, request *http.Request) {
 			message: "Unable to decode the request body.",
 		}
 		json.NewEncoder(writer).Encode(error)
+		ErrorPut.Inc()
 		return
 	}
 
 	_ = updateUserInDB(int64(id), user)
 
 	writer.WriteHeader(200)
+
+	RequestCountPut.Inc()
+	requestTime := time.Since(requestStart).Seconds()
+	log.Printf("requestTime %s", requestTime)
+	LatencyPut.Observe(requestTime)
 }
 
 func deleteUser(writer http.ResponseWriter, request *http.Request) {
-	defer RequestCountDelete.Inc()
+	requestStart := time.Now()
 
 	writer.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -160,12 +191,18 @@ func deleteUser(writer http.ResponseWriter, request *http.Request) {
 			message: "Unable to convert the string into int.",
 		}
 		json.NewEncoder(writer).Encode(error)
+		ErrorDelete.Inc()
 		return
 	}
 
 	_ = deleteUserFromDB(int64(id))
 
 	writer.WriteHeader(204)
+
+	RequestCountDelete.Inc()
+	requestTime := time.Since(requestStart).Seconds()
+	log.Printf("requestTime %s", requestTime)
+	LatencyDelete.Observe(requestTime)
 }
 
 func insertUser(user User) int64 {
