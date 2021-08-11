@@ -1,6 +1,17 @@
-# OTUS Microservice Architecture home work
+Развернуть в кластере две версии приложения и настроить балансировку трафика между ними
 
-Each home work implemented in own git branch. 
+Цель:
+В этом ДЗ вы научитесь:
 
-Course URL
-https://otus.ru/lessons/microservice-architecture/
+разворачивать Istio в кластере Kubernetes;
+настраивать балансировку трафика между разными версиями приложения.
+Инструкция к заданию и его описание находится по ссылке https://github.com/izhigalko/otus-homework-istio
+
+Задачи
+Задание состоит из этапов
+
+Развернуть Minikube
+Развернуть Istio c Ingress gateway
+Развернуть две версии приложения с использованием Istio
+Настроить балансировку трафика между версиями приложения на уровне Gateway 50% на 50%
+Сделать снимок экрана с картой сервисов в Kiali с примеров вызова двух версии сервиса
