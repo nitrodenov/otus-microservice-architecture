@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "auth-chart.fullname" . }}-secret
+type: Opaque
+data:
+  DB_NAME: {{ printf "%s" .Values.postgresql.postgresqlDatabase | b64enc | quote }}
+  DB_USER: {{ printf "%s" .Values.postgresql.postgresqlUsername | b64enc | quote }}
+  DB_PASSWORD: {{ printf "%s" .Values.postgresql.postgresqlPassword | b64enc | quote }}
+  DB_HOST: {{ printf "%s" (include "postgresql.fullname" .) | b64enc | quote }}
+  DB_PORT: {{ printf "%s" .Values.postgresql.postgresqlPort | b64enc | quote }}

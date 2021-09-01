@@ -1,0 +1,9 @@
+replicaCount: 2
+
+fullnameOverride: "user_app"
+
+image: nitrodenov/otus:v5.1.0
+
+service:
+  type: NodePort
+  port: 9000

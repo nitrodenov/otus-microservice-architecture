@@ -1,0 +1,18 @@
+replicaCount: 1
+
+fullnameOverride: "auth_app"
+
+image: nitrodenov/otus:v5.2.0
+
+service:
+  type: NodePort
+  port: 9000
+
+postgresql:
+  enabled: true
+  postgresqlUsername: user
+  postgresqlPassword: user
+  postgresqlDatabase: user
+  postgresqlHost: "postgres"
+  postgresqlPort: "5432"
+  persistenceSize: 0.1Gi
