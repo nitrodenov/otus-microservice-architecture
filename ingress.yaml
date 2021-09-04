@@ -46,7 +46,7 @@ spec:
           - backend:
               serviceName: user-app
               servicePort: 9000
-            path: /users/me
+            path: /users/user
           - backend:
               serviceName: user-app
               servicePort: 9000
