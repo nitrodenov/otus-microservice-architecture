@@ -19,6 +19,11 @@ type Session struct {
 	lastName  string
 }
 
+type Cred struct {
+	login string
+	password string
+}
+
 var sessions map[string]Session
 
 func main() {
@@ -35,7 +40,7 @@ func main() {
 }
 
 func signin(writer http.ResponseWriter, request *http.Request) {
-
+	json.NewEncoder(writer).Encode("{message: Please go to login and provide Login/Password}")
 }
 
 func register(writer http.ResponseWriter, request *http.Request) {
@@ -56,6 +61,25 @@ func register(writer http.ResponseWriter, request *http.Request) {
 }
 
 func login(writer http.ResponseWriter, request *http.Request) {
+	defer request.Body.Close()
+
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+
+	}
+	var cred Cred
+	err = json.Unmarshal(body, cred)
+	if err != nil {
+
+	}
+
+	userInfo := getUserInfo(cred.login, cred.password)
+	if userInfo == nil {
+
+	}
+}
+
+func getUserInfo(l string, password string) interface{} {
 
 }
 
