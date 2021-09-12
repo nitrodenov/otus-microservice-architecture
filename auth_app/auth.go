@@ -1,36 +1,35 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
 
-type Session struct {
-	id        int
-	login     string
-	email     string
-	firstName string
-	lastName  string
+type User struct {
+	id        int    `json:"id"`
+	login     string `json:"login"`
+	password  string `json:"password"`
+	email     string `json:"email"`
+	firstName string `json:"firstName"`
+	lastName  string `json:"lastName"`
 }
 
-type Cred struct {
-	login string
-	password string
-}
-
-var sessions map[string]Session
+var sessions map[string]User
 
 func main() {
 	r := mux.NewRouter()
+	r.HandleFunc("/register", register).Methods("POST")
+	r.HandleFunc("/login", login).Methods("POST")
 	r.HandleFunc("/signin", signin).Methods("GET")
-	r.HandleFunc("/register", register).Methods("GET")
-	r.HandleFunc("/login", login).Methods("GET")
 	r.HandleFunc("/auth", auth).Methods("GET")
 	r.HandleFunc("/logout", logout).Methods("GET")
 	http.Handle("/", r)
@@ -39,48 +38,57 @@ func main() {
 	http.ListenAndServe(":8000", nil)
 }
 
-func signin(writer http.ResponseWriter, request *http.Request) {
-	json.NewEncoder(writer).Encode("{message: Please go to login and provide Login/Password}")
-}
-
 func register(writer http.ResponseWriter, request *http.Request) {
 	defer request.Body.Close()
 
-	body, err := ioutil.ReadAll(request.Body)
+	writer.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Methods", "POST")
+	writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
+	var user User
+
+	err := json.NewDecoder(request.Body).Decode(&user)
 	if err != nil {
 
 	}
-	var session Session
-	err = json.Unmarshal(body, session)
-	if err != nil {
 
-	}
-
-
+	insertUser(user)
+	writer.WriteHeader(200)
 }
 
 func login(writer http.ResponseWriter, request *http.Request) {
 	defer request.Body.Close()
 
-	body, err := ioutil.ReadAll(request.Body)
+	writer.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Methods", "POST")
+	writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	var user User
+
+	err := json.NewDecoder(request.Body).Decode(&user)
 	if err != nil {
 
 	}
-	var cred Cred
-	err = json.Unmarshal(body, cred)
+
+	userInfo, err := getUserInfo(user.login, user.password)
 	if err != nil {
 
 	}
 
-	userInfo := getUserInfo(cred.login, cred.password)
-	if userInfo == nil {
-
-	}
+	sessionId := createSession(user)
+	http.SetCookie(writer, &http.Cookie{
+		Name:     "session_id",
+		Value:    sessionId,
+		HttpOnly: true,
+	})
+	writer.WriteHeader(200)
+	json.NewEncoder(writer).Encode(userInfo)
 }
 
-func getUserInfo(l string, password string) interface{} {
-
+func signin(writer http.ResponseWriter, request *http.Request) {
+	json.NewEncoder(writer).Encode("{message: Please go to login and provide Login/Password}")
 }
 
 func auth(writer http.ResponseWriter, request *http.Request) {
@@ -89,12 +97,12 @@ func auth(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(401)
 		return
 	}
-	session := sessions[cookie.Value]
-	writer.Header().Add("X-UserId", strconv.Itoa(session.id))
-	writer.Header().Add("X-User", session.login)
-	writer.Header().Add("X-Email", session.email)
-	writer.Header().Add("X-First-Name", session.firstName)
-	writer.Header().Add("X-Last-Name", session.lastName)
+	user := sessions[cookie.Value]
+	writer.Header().Add("X-UserId", strconv.Itoa(user.id))
+	writer.Header().Add("X-User", user.login)
+	writer.Header().Add("X-Email", user.email)
+	writer.Header().Add("X-First-Name", user.firstName)
+	writer.Header().Add("X-Last-Name", user.lastName)
 }
 
 func logout(writer http.ResponseWriter, request *http.Request) {
@@ -103,4 +111,66 @@ func logout(writer http.ResponseWriter, request *http.Request) {
 		Value:   "",
 		Expires: time.Time{},
 	})
+}
+
+func getUserInfo(login string, password string) (User, error) {
+	db := createConnection()
+	defer db.Close()
+
+	var user User
+
+	sqlStatement := `SELECT * FROM users WHERE login=$1 AND password=$2`
+	row := db.QueryRow(sqlStatement, login, password)
+	err := row.Scan(&user.login, &user.password, &user.email, &user.firstName, &user.lastName)
+
+	switch err {
+	case sql.ErrNoRows:
+		fmt.Println("No rows were returned!")
+		return user, nil
+	case nil:
+		return user, nil
+	default:
+		log.Fatalf("Unable to scan the row. %v", err)
+	}
+
+	return user, err
+}
+
+func insertUser(user User) int64 {
+	db := createConnection()
+	defer db.Close()
+
+	sqlStatement := `INSERT INTO users (login, password, email, firstName, lastName) VALUES ($1, $2, $3, $4, $5) RETURNING Id`
+
+	var id int64
+
+	err := db.QueryRow(sqlStatement, user.login, user.password, user.email, user.firstName, user.lastName).Scan(&id)
+	if err != nil {
+		log.Fatalf("Unable to execute the query. %v", err)
+	}
+
+	fmt.Printf("Inserted a single record %v", id)
+	return id
+}
+
+func createSession(user User) string {
+	sessionId := uuid.New().String()
+	sessions[sessionId] = user
+	return sessionId
+}
+
+func createConnection() *sql.DB {
+	psqlconn := os.Getenv("DATABASE_URI")
+	db, err := sql.Open("postgres", psqlconn)
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Successfully connected!")
+	return db
 }
