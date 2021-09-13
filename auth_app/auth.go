@@ -10,12 +10,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 )
 
 type User struct {
-	id        int    `json:"id"`
+	id        string `json:"id"`
 	login     string `json:"login"`
 	password  string `json:"password"`
 	email     string `json:"email"`
@@ -50,7 +49,7 @@ func register(writer http.ResponseWriter, request *http.Request) {
 
 	err := json.NewDecoder(request.Body).Decode(&user)
 	if err != nil {
-
+		log.Fatalf("Error in register")
 	}
 
 	insertUser(user)
@@ -69,12 +68,12 @@ func login(writer http.ResponseWriter, request *http.Request) {
 
 	err := json.NewDecoder(request.Body).Decode(&user)
 	if err != nil {
-
+		log.Fatalf("Error in login")
 	}
 
 	userInfo, err := getUserInfo(user.login, user.password)
 	if err != nil {
-
+		log.Fatalf("Error in login after getting user info")
 	}
 
 	sessionId := createSession(user)
@@ -98,7 +97,7 @@ func auth(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	user := sessions[cookie.Value]
-	writer.Header().Add("X-UserId", strconv.Itoa(user.id))
+	writer.Header().Add("X-UserId", user.id)
 	writer.Header().Add("X-User", user.login)
 	writer.Header().Add("X-Email", user.email)
 	writer.Header().Add("X-First-Name", user.firstName)
@@ -140,11 +139,12 @@ func insertUser(user User) int64 {
 	db := createConnection()
 	defer db.Close()
 
-	sqlStatement := `INSERT INTO users (login, password, email, firstName, lastName) VALUES ($1, $2, $3, $4, $5) RETURNING Id`
+	userId := uuid.New().String()
+	sqlStatement := `INSERT INTO users (id, login, password, email, firstName, lastName) VALUES ($1, $2, $3, $4, $5, $6) RETURNING Id`
 
 	var id int64
 
-	err := db.QueryRow(sqlStatement, user.login, user.password, user.email, user.firstName, user.lastName).Scan(&id)
+	err := db.QueryRow(sqlStatement, userId, user.login, user.password, user.email, user.firstName, user.lastName).Scan(&id)
 	if err != nil {
 		log.Fatalf("Unable to execute the query. %v", err)
 	}
