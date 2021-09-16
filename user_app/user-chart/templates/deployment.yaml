@@ -3,22 +3,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "user-chart.fullname" . }}
-  labels:
-    {{- include "user-chart.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "user-chart.selectorLabels" . | nindent 6 }}
+      app: {{ .Values.deployment.app }}
   template:
     metadata:
       labels:
-        {{- include "user-chart.selectorLabels" . | nindent 8 }}
+        app: {{ .Values.deployment.app }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image }}"
           ports:
-            - name: http
+            - name: {{ .Values.deployment.targetPort }}
               containerPort: 8000
-              protocol: TCP

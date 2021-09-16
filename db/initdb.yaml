@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: otus5-initdb
+spec:
+  template:
+    metadata:
+      name: otus5-initdb
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: post-install-job
+          env:
+            - name: DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: otus5-secret
+                  key: DATABASE_URI
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: otus5-config
+                  key: DATABASE_NAME
+          image: postgres:latest
+          command:
+            - sh
+            - "-c"
+            - |
+              psql $DATABASE_URI <<'EOF'
+                create table users (id varchar primary key, login varchar, password varchar, email varchar, firstName varchar, lastName varchar);
+              EOF
+  backoffLimit: 2

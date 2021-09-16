@@ -1,9 +1,18 @@
 replicaCount: 2
 
-fullnameOverride: "user_app"
+fullnameOverride: "user-info-app"
 
-image: nitrodenov/otus:v5.1.0
+image: nitrodenov/otus:v5.1.1
+
+deployment:
+  app: otus5
+  targetPort: container-port
 
 service:
   type: NodePort
   port: 9000
+  app: otus5
+  targetPort: container-port
+
+ingress:
+  host: arch.homework

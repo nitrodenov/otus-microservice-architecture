@@ -1,4 +1,4 @@
-module otus
+module otus/user_app
 
 go 1.16
 

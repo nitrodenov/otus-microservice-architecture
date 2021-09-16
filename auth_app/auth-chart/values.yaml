@@ -1,18 +1,18 @@
 replicaCount: 1
 
-fullnameOverride: "auth_app"
+fullnameOverride: "auth-app"
 
-image: nitrodenov/otus:v5.2.0
+image: nitrodenov/otus:v5.2.6
+
+deployment:
+  app: otus5
+  targetPort: container-port
 
 service:
   type: NodePort
   port: 9000
+  app: otus5
+  targetPort: container-port
 
-postgresql:
-  enabled: true
-  postgresqlUsername: user
-  postgresqlPassword: user
-  postgresqlDatabase: user
-  postgresqlHost: "postgres"
-  postgresqlPort: "5432"
-  persistenceSize: 0.1Gi
+ingress:
+  host: arch.homework

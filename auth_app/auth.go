@@ -7,22 +7,21 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
 type User struct {
-	id        string `json:"id"`
-	login     string `json:"login"`
-	password  string `json:"password"`
-	email     string `json:"email"`
-	firstName string `json:"firstName"`
-	lastName  string `json:"lastName"`
+	Id        string `json:"id"`
+	Login     string `json:"login"`
+	Password  string `json:"password"`
+	Email     string `json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }
 
-var sessions map[string]User
+var sessions = make(map[string]User)
 
 func main() {
 	r := mux.NewRouter()
@@ -49,7 +48,7 @@ func register(writer http.ResponseWriter, request *http.Request) {
 
 	err := json.NewDecoder(request.Body).Decode(&user)
 	if err != nil {
-		log.Fatalf("Error in register")
+		fmt.Println("Error in register")
 	}
 
 	insertUser(user)
@@ -68,12 +67,12 @@ func login(writer http.ResponseWriter, request *http.Request) {
 
 	err := json.NewDecoder(request.Body).Decode(&user)
 	if err != nil {
-		log.Fatalf("Error in login")
+		fmt.Println("Error in login")
 	}
 
-	userInfo, err := getUserInfo(user.login, user.password)
+	userInfo, err := getUserInfo(user.Login, user.Password)
 	if err != nil {
-		log.Fatalf("Error in login after getting user info")
+		fmt.Println("Error in login after getting user info")
 	}
 
 	sessionId := createSession(user)
@@ -87,6 +86,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
 }
 
 func signin(writer http.ResponseWriter, request *http.Request) {
+	writer.WriteHeader(200)
 	json.NewEncoder(writer).Encode("{message: Please go to login and provide Login/Password}")
 }
 
@@ -97,11 +97,11 @@ func auth(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	user := sessions[cookie.Value]
-	writer.Header().Add("X-UserId", user.id)
-	writer.Header().Add("X-User", user.login)
-	writer.Header().Add("X-Email", user.email)
-	writer.Header().Add("X-First-Name", user.firstName)
-	writer.Header().Add("X-Last-Name", user.lastName)
+	writer.Header().Add("X-UserId", user.Id)
+	writer.Header().Add("X-User", user.Login)
+	writer.Header().Add("X-Email", user.Email)
+	writer.Header().Add("X-First-Name", user.FirstName)
+	writer.Header().Add("X-Last-Name", user.LastName)
 }
 
 func logout(writer http.ResponseWriter, request *http.Request) {
@@ -120,7 +120,7 @@ func getUserInfo(login string, password string) (User, error) {
 
 	sqlStatement := `SELECT * FROM users WHERE login=$1 AND password=$2`
 	row := db.QueryRow(sqlStatement, login, password)
-	err := row.Scan(&user.login, &user.password, &user.email, &user.firstName, &user.lastName)
+	err := row.Scan(&user.Id, &user.Login, &user.Password, &user.Email, &user.FirstName, &user.LastName)
 
 	switch err {
 	case sql.ErrNoRows:
@@ -129,24 +129,24 @@ func getUserInfo(login string, password string) (User, error) {
 	case nil:
 		return user, nil
 	default:
-		log.Fatalf("Unable to scan the row. %v", err)
+		fmt.Println("Unable to scan the row. %v", err)
 	}
 
 	return user, err
 }
 
-func insertUser(user User) int64 {
+func insertUser(user User) string {
 	db := createConnection()
 	defer db.Close()
 
 	userId := uuid.New().String()
 	sqlStatement := `INSERT INTO users (id, login, password, email, firstName, lastName) VALUES ($1, $2, $3, $4, $5, $6) RETURNING Id`
 
-	var id int64
+	var id string
 
-	err := db.QueryRow(sqlStatement, userId, user.login, user.password, user.email, user.firstName, user.lastName).Scan(&id)
+	err := db.QueryRow(sqlStatement, userId, user.Login, user.Password, user.Email, user.FirstName, user.LastName).Scan(&id)
 	if err != nil {
-		log.Fatalf("Unable to execute the query. %v", err)
+		fmt.Println("Unable to execute the query. %v", err)
 	}
 
 	fmt.Printf("Inserted a single record %v", id)
