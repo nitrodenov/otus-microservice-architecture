@@ -1,0 +1,53 @@
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: auth-app
+spec:
+  rules:
+    - host: arch.homework
+      http:
+        paths:
+          - path: /login
+            backend:
+              serviceName: auth-app
+              servicePort: 9000
+          - path: /signin
+            backend:
+              serviceName: auth-app
+              servicePort: 9000
+          - path: /logout
+            backend:
+              serviceName: auth-app
+              servicePort: 9000
+          - path: /register
+            backend:
+              serviceName: auth-app
+              servicePort: 9000
+          - path: /auth
+            backend:
+              serviceName: auth-app
+              servicePort: 9000
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: user-info-app
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: "auth-app.default.svc.cluster.local:9000/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "auth-app.default.svc.cluster.local:9000/signin"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-User,X-Email,X-UserId,X-First-Name,X-Last-Name"
+spec:
+  rules:
+    - host: arch.homework
+      http:
+        paths:
+          - path: /users/user
+            backend:
+              serviceName: user-info-app
+              servicePort: 9000
+          - path: /users/edit
+            backend:
+              serviceName: user-info-app
+              servicePort: 9000

@@ -12,17 +12,17 @@ import (
 )
 
 type User struct {
-	id        string `json:"id"`
-	login     string `json:"login"`
-	password  string `json:"password"`
-	email     string `json:"email"`
-	firstName string `json:"firstName"`
-	lastName  string `json:"lastName"`
+	Id        string `json:"id"`
+	Login     string `json:"login"`
+	Password  string `json:"password"`
+	Email     string `json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }
 
 type Error struct {
-	code    int32
-	message string
+	Code    int32  `json:"code"`
+	Message string `json:"message"`
 }
 
 func main() {
@@ -39,8 +39,8 @@ func getUser(writer http.ResponseWriter, request *http.Request) {
 	userId := request.Header.Get("X-UserId")
 	if userId == "" {
 		error := Error{
-			code:    0,
-			message: "Not authorized",
+			Code:    0,
+			Message: "Not authorized. getUser",
 		}
 		writer.WriteHeader(401)
 		json.NewEncoder(writer).Encode(error)
@@ -59,8 +59,8 @@ func edit(writer http.ResponseWriter, request *http.Request) {
 	userId := request.Header.Get("X-UserId")
 	if userId == "" {
 		error := Error{
-			code:    0,
-			message: "Not authorized",
+			Code:    0,
+			Message: "Not authorized",
 		}
 		writer.WriteHeader(401)
 		json.NewEncoder(writer).Encode(error)
@@ -73,7 +73,7 @@ func edit(writer http.ResponseWriter, request *http.Request) {
 		log.Fatalf("Error in edit user")
 	}
 
-	if user.id != userId {
+	if user.Id != userId {
 		log.Fatalf("Error in edit user. user.id != userId")
 	}
 
@@ -87,7 +87,7 @@ func editUser(user User) int64 {
 
 	sqlStatement := `UPDATE users SET login=$2, firstName=$3, email=$4, firstName=$5, lastName=$6 WHERE id=$1`
 
-	res, err := db.Exec(sqlStatement, user.id, user.login, user.email, user.firstName, user.lastName)
+	res, err := db.Exec(sqlStatement, user.Id, user.Login, user.Email, user.FirstName, user.LastName)
 	if err != nil {
 		log.Fatalf("Unable to execute the query. %v", err)
 	}
@@ -109,7 +109,7 @@ func getUserInfo(userId string) (User, error) {
 
 	sqlStatement := `SELECT * FROM users WHERE id=$1`
 	row := db.QueryRow(sqlStatement, userId)
-	err := row.Scan(&user.login, &user.password, &user.email, &user.firstName, &user.lastName)
+	err := row.Scan(&user.Login, &user.Password, &user.Email, &user.FirstName, &user.LastName)
 
 	switch err {
 	case sql.ErrNoRows:

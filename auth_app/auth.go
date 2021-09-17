@@ -21,6 +21,11 @@ type User struct {
 	LastName  string `json:"lastName"`
 }
 
+type Error struct {
+	Code    int32  `json:"code"`
+	Message string `json:"message"`
+}
+
 var sessions = make(map[string]User)
 
 func main() {
@@ -91,17 +96,24 @@ func signin(writer http.ResponseWriter, request *http.Request) {
 }
 
 func auth(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println("Auth started")
 	cookie, err := request.Cookie("session_id")
 	if err != nil {
+		error := Error{
+			Code:    0,
+			Message: "Not authorized. session_id",
+		}
 		writer.WriteHeader(401)
+		json.NewEncoder(writer).Encode(error)
 		return
 	}
 	user := sessions[cookie.Value]
-	writer.Header().Add("X-UserId", user.Id)
-	writer.Header().Add("X-User", user.Login)
-	writer.Header().Add("X-Email", user.Email)
-	writer.Header().Add("X-First-Name", user.FirstName)
-	writer.Header().Add("X-Last-Name", user.LastName)
+	writer.Header().Set("X-UserId", user.Id)
+	writer.Header().Set("X-User", user.Login)
+	writer.Header().Set("X-Email", user.Email)
+	writer.Header().Set("X-First-Name", user.FirstName)
+	writer.Header().Set("X-Last-Name", user.LastName)
+	writer.WriteHeader(200)
 }
 
 func logout(writer http.ResponseWriter, request *http.Request) {
