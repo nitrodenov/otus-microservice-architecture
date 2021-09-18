@@ -35,8 +35,8 @@ kind: Ingress
 metadata:
   name: user-info-app
   annotations:
-    nginx.ingress.kubernetes.io/auth-url: "auth-app.default.svc.cluster.local:9000/auth"
-    nginx.ingress.kubernetes.io/auth-signin: "auth-app.default.svc.cluster.local:9000/signin"
+    nginx.ingress.kubernetes.io/auth-url: "http://auth-app.default.svc.cluster.local:9000/auth"
+#    nginx.ingress.kubernetes.io/auth-signin: "auth-app.default.svc.cluster.local/signin"
     nginx.ingress.kubernetes.io/auth-response-headers: "X-User,X-Email,X-UserId,X-First-Name,X-Last-Name"
 spec:
   rules:

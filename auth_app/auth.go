@@ -107,12 +107,13 @@ func auth(writer http.ResponseWriter, request *http.Request) {
 		json.NewEncoder(writer).Encode(error)
 		return
 	}
+	fmt.Println(cookie)
 	user := sessions[cookie.Value]
-	writer.Header().Set("X-UserId", user.Id)
-	writer.Header().Set("X-User", user.Login)
-	writer.Header().Set("X-Email", user.Email)
-	writer.Header().Set("X-First-Name", user.FirstName)
-	writer.Header().Set("X-Last-Name", user.LastName)
+	writer.Header().Add("X-UserId", user.Id)
+	writer.Header().Add("X-User", user.Login)
+	writer.Header().Add("X-Email", user.Email)
+	writer.Header().Add("X-First-Name", user.FirstName)
+	writer.Header().Add("X-Last-Name", user.LastName)
 	writer.WriteHeader(200)
 }
 
