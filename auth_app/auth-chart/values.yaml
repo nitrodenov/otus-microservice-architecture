@@ -2,7 +2,7 @@ replicaCount: 1
 
 fullnameOverride: "auth-app"
 
-image: nitrodenov/otus:v5.2.11
+image: nitrodenov/otus:v5.2.14
 
 deployment:
   app: otus5

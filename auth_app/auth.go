@@ -80,7 +80,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
 		fmt.Println("Error in login after getting user info")
 	}
 
-	sessionId := createSession(user)
+	sessionId := createSession(userInfo)
 	http.SetCookie(writer, &http.Cookie{
 		Name:     "session_id",
 		Value:    sessionId,
@@ -108,13 +108,17 @@ func auth(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	fmt.Println(cookie)
+	fmt.Println(cookie.Value)
 	user := sessions[cookie.Value]
+	fmt.Println(user.Id)
+	fmt.Println(user.Login)
 	writer.Header().Add("X-UserId", user.Id)
 	writer.Header().Add("X-User", user.Login)
 	writer.Header().Add("X-Email", user.Email)
 	writer.Header().Add("X-First-Name", user.FirstName)
 	writer.Header().Add("X-Last-Name", user.LastName)
 	writer.WriteHeader(200)
+	fmt.Println("Auth ended")
 }
 
 func logout(writer http.ResponseWriter, request *http.Request) {

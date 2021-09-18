@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,3 +18,14 @@ spec:
           ports:
             - name: {{ .Values.deployment.targetPort }}
               containerPort: 8000
+          env:
+            - name: DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: otus5-secret
+                  key: DATABASE_URI
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: otus5-config
+                  key: DATABASE_NAME
