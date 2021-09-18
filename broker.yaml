@@ -1,0 +1,164 @@
+asyncapi: 2.0.0
+info:
+  title: Обработка заказа
+  version: '1.0.0'
+  description: Event Collaboration
+defaultContentType: application/json
+
+channels:
+  billing/RegisterRequested:
+    publish:
+      message:
+        name: Register
+        title: Запрос на регистрацию
+        payload:
+          type: object
+          properties:
+            login:
+              type: string
+            firstName:
+              type: string
+            lastName:
+              type: string
+            email:
+              type: string
+            password:
+              type: string
+        examples:
+          - payload:
+              login: login
+              password: '123'
+              firstName: firstName
+              lastName: lastName
+              email: email@email.com
+
+  billing/Registered:
+    publish:
+      message:
+        name: Registered
+        payload:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            login:
+              type: string
+            firstName:
+              type: string
+            lastName:
+              type: string
+            email:
+              type: string
+        examples:
+          - payload:
+              id: 1
+              login: login
+              firstName: firstName
+              lastName: lastName
+              email: jas@stat.com
+              password: '123'
+
+  billing/Transfer:
+    publish:
+      message:
+        name: Transfer
+        title: Запрос на пополнение счета
+        payload:
+          type: object
+          properties:
+            price:
+              type: integer
+            userId:
+              type: integer
+        examples:
+          - payload:
+              price: 100500
+              userId: 1
+
+  billing/Transferred:
+    publish:
+      message:
+        name: Transferred
+        payload:
+          type: object
+          properties:
+            userId:
+              type: integer
+              format: int64
+            price:
+              type: integer
+        examples:
+          - payload:
+              userId: 1
+              price: 100500
+
+  billing/Withdraw:
+    publish:
+      message:
+        name: Withdraw
+        title: Запрос на снятие денежных средств
+        payload:
+          type: object
+          properties:
+            price:
+              type: integer
+            userId:
+              type: integer
+        examples:
+          - payload:
+              price: 100500
+              userId: 1
+
+  order/OrderCreate:
+    publish:
+      message:
+        name: OrderCreate
+        title: Запрос на создание заказа
+        payload:
+          type: object
+          properties:
+            price:
+              type: integer
+            userId:
+              type: integer
+        examples:
+          - payload:
+              price: 100500
+              userId: 1
+
+  order/OrderCreated:
+    publish:
+      message:
+        name: OrderCreated
+        payload:
+          type: object
+          properties:
+            userId:
+              type: integer
+              format: int64
+            price:
+              type: integer
+            orderId:
+              type: integer
+        examples:
+          - payload:
+              userId: 1
+              price: 100500
+              orderId: 2
+
+  notification/SendNotification:
+    publish:
+      message:
+        tags:
+          - name: order
+        name: SendNotification
+        title: Запланирована отправка уведомления
+        payload:
+          type: object
+          properties:
+            email:
+              type: string
+        examples:
+          - payload:
+              email: 'email@email.com'
