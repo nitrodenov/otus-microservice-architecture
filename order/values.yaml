@@ -1,0 +1,20 @@
+replicaCount: 2
+
+image: nitrodenov/otus:v7.1
+
+deployment:
+  app: order
+  targetPort: container-port
+
+service:
+  type: NodePort
+  port: 9000
+  app: order
+  targetPort: container-port
+
+externalPostgresql:
+  postgresqlUsername: user
+  postgresqlPassword: user
+  postgresqlDatabase: orders
+  postgresqlHost: "postgres"
+  postgresqlPort: "5432"

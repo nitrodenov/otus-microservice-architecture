@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: order-initdb
+spec:
+  template:
+    metadata:
+      name: order-initdb
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: post-install-job
+          env:
+            - name: DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: order-secret
+                  key: DATABASE_URI
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: order-config
+                  key: DATABASE_NAME
+          image: postgres:latest
+          command:
+            - sh
+            - "-c"
+            - |
+              psql $DATABASE_URI <<'EOF'
+                create extension if not exists "uuid-ossp";
+                create cast (varchar as uuid) with inout as implicit;
+                create table if not exists orders (
+                    id uuid primary key,
+                    owner_id uuid not null,
+                    price integer not null,
+                    version integer not null,
+                    status varchar(20) not null
+                );
+                create unique index concurrently if not exists owner_id_version_idx on orders (owner_id, version);
+              EOF
+  backoffLimit: 2

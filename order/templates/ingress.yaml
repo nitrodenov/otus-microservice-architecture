@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ include "order.fullname" . }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: arch.homework
+      http:
+        paths:
+          - path: /order
+            backend:
+              serviceName: {{ include "order.fullname" . }}
+              servicePort: 9000
+          - path: /orders
+            backend:
+              serviceName: {{ include "order.fullname" . }}
+              servicePort: 9000
