@@ -1,4 +1,4 @@
-package otus
+package main
 
 import (
 	"database/sql"
