@@ -11,4 +11,4 @@ metadata:
   name: order-secret
 type: Opaque
 data:
-  DATABASE_URI: cG9zdGdyZXNxbDovL3VzZXI6dXNlckBwb3N0Z3Jlcy9vcmRlcnM/c3NsbW9kZT1kaXNhYmxl
+  DATABASE_URI: cG9zdGdyZXNxbDovL3VzZXI6dXNlckBwb3N0Z3Jlcy91c2VyP3NzbG1vZGU9ZGlzYWJsZQ==
