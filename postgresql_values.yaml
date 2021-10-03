@@ -4,7 +4,7 @@ postgresqlPassword: user
 postgresqlDatabase: orders
 
 service:
-  type: LoadBalancer
+  type: NodePort
   port: 5432
 
 persistence:
