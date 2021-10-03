@@ -1,6 +1,6 @@
 replicaCount: 2
 
-image: nitrodenov/otus:v7.1
+image: nitrodenov/otus:v7.2
 
 deployment:
   app: order
