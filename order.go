@@ -20,8 +20,7 @@ type Order struct {
 }
 
 type OrderRequest struct {
-	UserId string `json:"userId"`
-	Price  int64  `json:"price"`
+	Price int64 `json:"price"`
 }
 
 type OrderResponse struct {
@@ -96,18 +95,6 @@ func createOrder(order Order) (int64, error) {
 	}
 	return order.Version, nil
 }
-
-//func updateOrderStatusById(orderId string, orderStatus string) {
-//	db := createConnection()
-//	defer db.Close()
-//
-//	var id string
-//	sqlStatement := `UPDATE orders SET status = $1 WHERE id = $2`
-//	err := db.QueryRow(sqlStatement, orderStatus, orderId).Scan(&id)
-//	if err != nil {
-//		fmt.Println("Error in updateOrderStatusById")
-//	}
-//}
 
 func getLatestVersionOfOrderListForOwner(ownerId string) int64 {
 	db := createConnection()
