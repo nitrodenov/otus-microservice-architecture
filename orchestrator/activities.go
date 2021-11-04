@@ -1,34 +1,36 @@
 package main
 
-import "context"
+import (
+	"context"
+)
 
-func PlaceOrder(ctx context.Context) (string, error) {
-
-}
-
-func DeclineOrder(ctx context.Context, orderId string) (string, error) {
-
-}
-func ReserveItems(ctx context.Context, consumerId string, orderId string, items []Item) (string, error) {
+func PlaceOrder(ctx context.Context) {
 
 }
 
-func CancelReservation(ctx context.Context, reservationId int64) (string, error) {
+func DeclineOrder(ctx context.Context, orderId string) {
+
+}
+func ReserveItems(ctx context.Context, consumerId string, orderId string, items []Item) {
 
 }
 
-func ReserveDelivery(ctx context.Context, orderId string, delivery DeliveryDetail) (string, error) {
+func CancelReservation(ctx context.Context, reservationId int64) {
 
 }
 
-func CancelDelivery(ctx context.Context, deliveryId string) (string, error) {
+func ReserveDelivery(ctx context.Context, orderId string, delivery DeliveryDetail) {
 
 }
 
-func MakePayment(ctx context.Context, consumerId string, orderId string, items []Item) (string, error) {
+func CancelDelivery(ctx context.Context, deliveryId string) {
 
 }
 
-func ConfirmOrder(ctx context.Context, orderId string, delivery int64, paymentId int64, reservationId int64) (string, error) {
+func MakePayment(ctx context.Context, consumerId string, orderId string, items []Item) {
+
+}
+
+func ConfirmOrder(ctx context.Context, orderId string, delivery int64, paymentId int64, reservationId int64) {
 
 }
